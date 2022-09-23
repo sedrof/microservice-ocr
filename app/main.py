@@ -72,7 +72,7 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         raise HTTPException(detail="Invalid image", status_code=400)
     preds = pytesseract.image_to_string(img)
     predictions = [x for x in preds.split("\n")]
-    return {"results": predictions, "original": preds}
+    return {"results": predictions, "original": preds, 'tst':'tst'}
 
 
 @app.post("/img-echo/", response_class=FileResponse) # http POST
