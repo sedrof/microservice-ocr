@@ -81,27 +81,25 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         with NamedTemporaryFile(delete=False, suffix=suffix, dir=dir_path) as tmp:
             shutil.copyfileobj(file.file, tmp)
             tmp_path = pathlib.Path(tmp.name)
-            print(tmp_path, 'tmp pathjjjjj')
-            doc = fitz.open(tmp_path)
-            print(doc, 'dooooooc')
     except:
         os.remove(tmp_path)
         raise HTTPException(detail="Invalid file format", status_code=400)
     try:
         filename = tmp_path
-        print(filename, 'file naaaaame')
         # mat = fitz.Matrix(1, 1)  # the rendering matrix: scale down to 20%
         mat = fitz.Matrix(100 / 72, 100 / 72)
         cpu = cpu_count()
-
-        vectors = [(i, cpu, filename, mat) for i in range(cpu)]
+    except:
+        os.remove(tmp_path)
+        raise HTTPException(detail="Error in proccessing the images", status_code=400)
+    try:
+        vectors = [(i, cpu, filename, mat) for i in range(2)]
         pages_text = []
         with concurrent.futures.ProcessPoolExecutor() as executor:
             results = executor.map(create_picture, vectors)
             for result in results:
                 if result:
                     pages_text.append("".join(result).split('\n'))
-            print(pages_text)
     except:
         os.remove(tmp_path)
         raise HTTPException(detail="Error in proccessing the images", status_code=400)
