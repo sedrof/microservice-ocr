@@ -10,3 +10,5 @@ aiofiles
 python-multipart
 pillow
 pytesseract
+pymupdf
+fitz

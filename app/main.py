@@ -1,3 +1,4 @@
+
 import pathlib
 import os
 import io
@@ -12,24 +13,27 @@ from fastapi import(
     File,
     UploadFile
     )
-import pytesseract
-import fitz
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseSettings
 from PIL import Image
-from . ocr import ocr_page
+from . ocr import create_picture
 from tempfile import NamedTemporaryFile
 import shutil
+import concurrent.futures
+import fitz
+from multiprocessing import Pool, cpu_count
 
-pytesseract.pytesseract.tesseract_cmd = "C:\Program Files\Tesseract-OCR\\tesseract.exe"
+
+
+
 class Settings(BaseSettings):
     app_auth_token: str = 'asdasd'
-    debug: bool = False
+    debug: bool = True
     echo_active: bool = False
     app_auth_token_prod: str = None
-    skip_auth: bool = False
-
+    skip_auth: bool = True
+    
     class Config:
         env_file = ".env"
 
@@ -61,67 +65,49 @@ def verify_auth(authorization = Header(None), settings:Settings = Depends(get_se
     if settings.debug and settings.skip_auth:
         return
     if authorization is None:
-        raise HTTPException(detail="Invalid endpoint", status_code=401)
+        raise HTTPException(detail="Please provide a header", status_code=401)
     label, token = authorization.split()
     if token != settings.app_auth_token:
-        raise HTTPException(detail="Invalid endpoint", status_code=401)
+        raise HTTPException(detail="Invalid TOken", status_code=401)
 
 
 @app.post("/") # http POST
 async def prediction_view(file:UploadFile = File(...), authorization = Header(None), settings:Settings = Depends(get_settings)):
     verify_auth(authorization, settings)
-    print(file.filename, ' file......file')
+    # print(file.filename, ' file......file')
     try:
         suffix = pathlib.Path(file.filename).suffix
-        print(suffix, 'suffixxxx')
-        with NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with NamedTemporaryFile(delete=False, suffix=suffix, dir=dir_path) as tmp:
             shutil.copyfileobj(file.file, tmp)
             tmp_path = pathlib.Path(tmp.name)
             print(tmp_path, 'tmp pathjjjjj')
             doc = fitz.open(tmp_path)
-            mat = fitz.Matrix(400 / 72, 400 / 72)
-            img_filenames = []
-            i = 0
-            for page in doc:
-                pix = page.get_pixmap(matrix=mat)
-                img_filenames.append("page-%04i.png" % page.number) 
-                pix.pil_save(img_filenames[i], format="png", dpi=(300,300))
-                i+=1
-            print(img_filenames[1], 'pixxxx')
-            file.file.close()
-            tmp.close()
-            
+            print(doc, 'dooooooc')
     except:
-        file.file.close()
-        tmp.close()
+        os.remove(tmp_path)
         raise HTTPException(detail="Invalid file format", status_code=400)
     try:
-        img = [Image.open(x) for y, x in enumerate(img_filenames)]
+        filename = tmp_path
+        print(filename, 'file naaaaame')
+        # mat = fitz.Matrix(1, 1)  # the rendering matrix: scale down to 20%
+        mat = fitz.Matrix(100 / 72, 100 / 72)
+        cpu = cpu_count()
+
+        vectors = [(i, cpu, filename, mat) for i in range(cpu)]
+        pages_text = []
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            results = executor.map(create_picture, vectors)
+            for result in results:
+                if result:
+                    pages_text.append("".join(result).split('\n'))
+            print(pages_text)
     except:
-        raise HTTPException(detail="Invalid file", status_code=400)
+        os.remove(tmp_path)
+        raise HTTPException(detail="Error in proccessing the images", status_code=400)
 
-    # preds = [pytesseract.image_to_string(x) for y, x in enumerate(img)]
-    # predictions = [x for x in preds[0].split("\n")]
-    predictions = ocr_page(img[0])
-    file.file.close()
-    tmp.close()
-    print(tmp_path, 'in the last....')
-    shutil.rmtree(tmp_path)
-    return {"results": predictions, 'tst':'tst'}
-    # except:
-    #     raise HTTPException(detail="Invalid file before last", status_code=400)
-    
-
-    # bytes_str = io.BytesIO(await file.read())
-    # files = await file.read()
-    # print(type(files), ' typeeee')
-    # doc = fitz.open(files)
-    # page = doc.loadPage(0)
-    # pix = page.get_pixmap()
-    # output = "outfile.png"
-    # pix.save(output)
-    # bytes_str = io.BytesIO(pix.read())
-    
+    os.remove(tmp_path)
+    return {"results": pages_text, 'tst':'tst'}
 
 
 @app.post("/img-echo/", response_class=FileResponse) # http POST
