@@ -108,7 +108,8 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         results = execute_concurrently(create_picture, vectors)
     except:
         os.remove(tmp_path)
-        
+            # raise HTTPException(detail="Error in proccessing the images", status_code=400)
+
         raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
 
     os.remove(tmp_path)
