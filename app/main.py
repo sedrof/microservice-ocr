@@ -1,5 +1,6 @@
 
 import pathlib
+import logging
 import os
 import io
 import uuid
@@ -23,8 +24,18 @@ import shutil
 import concurrent.futures
 import fitz
 from multiprocessing import Pool, cpu_count
+from boto3 import session
+from botocore.client import Config
 
+ACCESS_ID = 'DO006YU2K49CFPYZZ6FT'
+SECRET_KEY = 'u9heysFpujtYAZxxzM+l+sD0MOuhmneHyA1vvv+IZ7E'
 
+session = session.Session()
+client = session.client('s3',
+                        region_name='nyc3',
+                        endpoint_url='https://nyc3.digitaloceanspaces.com',
+                        aws_access_key_id=ACCESS_ID,
+                        aws_secret_access_key=SECRET_KEY)
 
 
 class Settings(BaseSettings):
@@ -102,7 +113,8 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
                     pages_text.append("".join(result).split('\n'))
     except:
         os.remove(tmp_path)
-        raise HTTPException(detail="Error in proccessing the images", status_code=400)
+        
+        raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
 
     os.remove(tmp_path)
     return {"results": pages_text, 'tst':'tst'}
