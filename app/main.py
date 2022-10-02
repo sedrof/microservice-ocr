@@ -104,7 +104,7 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         os.remove(tmp_path)
         raise HTTPException(detail="Error in proccessing the images", status_code=400)
     try:
-        vectors = [(i, cpu, filename, mat) for i in range(2)]
+        vectors = [(i, cpu, filename, mat) for i in range(cpu)]
         pages_text = []
         with concurrent.futures.ProcessPoolExecutor() as executor:
             results = executor.map(create_picture, vectors)
