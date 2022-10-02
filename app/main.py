@@ -18,7 +18,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseSettings
 from PIL import Image
-from . ocr import create_picture
+from . ocr import create_picture, execute_concurrently
 from tempfile import NamedTemporaryFile
 import shutil
 import concurrent.futures
@@ -105,19 +105,14 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         raise HTTPException(detail="Error in proccessing the images", status_code=400)
     try:
         vectors = [(i, cpu, filename, mat) for i in range(cpu)]
-        pages_text = []
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            results = executor.map(create_picture, vectors)
-            for result in results:
-                if result:
-                    pages_text.append("".join(result).split('\n'))
+        results = execute_concurrently(create_picture, vectors)
     except:
         os.remove(tmp_path)
         
         raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
 
     os.remove(tmp_path)
-    return {"results": pages_text, 'tst':'tst'}
+    return {"results": results}
 
 
 @app.post("/img-echo/", response_class=FileResponse) # http POST

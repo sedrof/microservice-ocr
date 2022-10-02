@@ -1,5 +1,6 @@
 import pytesseract
 import fitz
+import concurrent.futures
 
 def create_picture(vector):
     idx = vector[0]  # this is the segment number we have to process
@@ -25,3 +26,15 @@ def create_picture(vector):
         predictions = [x for x in preds.split("\n")]
         return predictions
     # print("Processed page numbers %i through %i" % (seg_from, seg_to - 1))
+
+pages_text = []
+def execute_concurrently(function, kwargs_list):
+    results = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(function, kwargs) for kwargs in kwargs_list]
+    for future in concurrent.futures.as_completed(futures):
+        if future.result():
+            pages_text.append("".join(future.result()))
+            # results.append(future.result())
+        # break
+    return pages_text
