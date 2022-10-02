@@ -114,7 +114,6 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
     os.remove(tmp_path)
     return {"results": results}
 
-
 @app.post("/img-echo/", response_class=FileResponse) # http POST
 async def img_echo_view(file:UploadFile = File(...), settings:Settings = Depends(get_settings)):
     if not settings.echo_active:
