@@ -29,7 +29,7 @@ def create_picture(vector):
 
 pages_text = []
 def execute_concurrently(function, kwargs_list):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         futures = [executor.submit(function, kwargs) for kwargs in kwargs_list]
     for future in concurrent.futures.as_completed(futures):
         if future.result():
