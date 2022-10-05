@@ -24,18 +24,9 @@ import shutil
 import concurrent.futures
 import fitz
 from multiprocessing import Pool, cpu_count
-from boto3 import session
-from botocore.client import Config
 
 ACCESS_ID = 'DO006YU2K49CFPYZZ6FT'
 SECRET_KEY = 'u9heysFpujtYAZxxzM+l+sD0MOuhmneHyA1vvv+IZ7E'
-
-session = session.Session()
-client = session.client('s3',
-                        region_name='nyc3',
-                        endpoint_url='https://nyc3.digitaloceanspaces.com',
-                        aws_access_key_id=ACCESS_ID,
-                        aws_secret_access_key=SECRET_KEY)
 
 
 class Settings(BaseSettings):
@@ -102,31 +93,33 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         cpu = cpu_count()
     except:
         os.remove(tmp_path)
-        raise HTTPException(detail="Error in the file", status_code=400)
+        raise HTTPException(detail="Error in proccessing the images", status_code=400)
     try:
         vectors = [(i, cpu, filename, mat) for i in range(cpu)]
         results = execute_concurrently(create_picture, vectors)
     except:
         os.remove(tmp_path)
-            # raise HTTPException(detail="Error in proccessing the images", status_code=400)
-
         raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
 
     os.remove(tmp_path)
-    return {"results": results}
+    return {"results": results, 'tst':'tst'}
 
-@app.post("/img-echo/", response_class=FileResponse) # http POST
-async def img_echo_view(file:UploadFile = File(...), settings:Settings = Depends(get_settings)):
-    if not settings.echo_active:
-        raise HTTPException(detail="Invalid endpoint", status_code=400)
-    UPLOAD_DIR.mkdir(exist_ok=True)
-    bytes_str = io.BytesIO(await file.read())
-    try:
-        img = Image.open(bytes_str)
-    except:
-        raise HTTPException(detail="Invalid image", status_code=400)
-    fname = pathlib.Path(file.filename)
-    fext = fname.suffix # .jpg, .txt
-    dest = UPLOAD_DIR / f"{uuid.uuid1()}{fext}"
-    img.save(dest)
-    return dest
+
+# @app.post("/img-echo/", response_class=FileResponse) # http POST
+# async def img_echo_view(file:UploadFile = File(...), settings:Settings = Depends(get_settings)):
+#     if not settings.echo_active:
+#         raise HTTPException(detail="Invalid endpoint", status_code=400)
+#     UPLOAD_DIR.mkdir(exist_ok=True)
+#     bytes_str = io.BytesIO(await file.read())
+#     try:
+#         img = Image.open(bytes_str)
+#     except:
+#         raise HTTPException(detail="Invalid image", status_code=400)
+#     fname = pathlib.Path(file.filename)
+#     fext = fname.suffix
+#     dest = UPLOAD_DIR / f"{uuid.uuid1()}{fext}"
+#     img.save(dest)
+#     return dest
+
+
+

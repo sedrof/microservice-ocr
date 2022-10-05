@@ -11,5 +11,3 @@ python-multipart
 pillow
 pytesseract
 pymupdf
-# fitz
-boto3
