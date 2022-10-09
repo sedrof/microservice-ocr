@@ -18,10 +18,9 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseSettings
 from PIL import Image
-from . ocr import create_picture, execute_concurrently
+from . ocr import create_picture, execute_concurrently, create_ocr
 from tempfile import NamedTemporaryFile
 import shutil
-import concurrent.futures
 import fitz
 from multiprocessing import Pool, cpu_count
 
@@ -89,14 +88,15 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
     try:
         filename = tmp_path
         # mat = fitz.Matrix(1, 1)  # the rendering matrix: scale down to 20%
-        mat = fitz.Matrix(100 / 72, 100 / 72)
+        mat = fitz.Matrix(100 / 50, 100 / 50)
         cpu = cpu_count()
     except:
         os.remove(tmp_path)
         raise HTTPException(detail="Error in proccessing the images", status_code=400)
     try:
-        vectors = [(i, cpu, filename, mat) for i in range(cpu)]
-        results = execute_concurrently(create_picture, vectors)
+        # vectors = [(i, cpu, filename, mat) for i in range(cpu)]
+        results = create_ocr(filename, mat)
+        # results = execute_concurrently(create_picture, vectors)
     except:
         os.remove(tmp_path)
         raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
