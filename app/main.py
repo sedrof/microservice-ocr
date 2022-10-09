@@ -75,7 +75,6 @@ def verify_auth(authorization = Header(None), settings:Settings = Depends(get_se
 @app.post("/") # http POST
 async def prediction_view(file:UploadFile = File(...), authorization = Header(None), settings:Settings = Depends(get_settings)):
     verify_auth(authorization, settings)
-    return {"results": "results", 'tst':'tst'} 
     # print(file.filename, ' file......file')
     try:
         suffix = pathlib.Path(file.filename).suffix
