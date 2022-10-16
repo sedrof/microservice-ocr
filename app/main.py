@@ -94,40 +94,32 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         raise HTTPException(detail="Error in proccessing the images", status_code=400)
     try:
         vectors = [(i, cpu, filename, mat) for i in range(2)]
-        # print(vectors)
-        # results = create_ocr(filename, mat)
+ 
         results = execute_concurrently(create_picture, vectors)
     except:
         os.remove(tmp_path)
         raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
 
     try:
-        total_amount = total_amount_func(results)
-        meter_no = meter_no_func(results)
-        inv_ref = inv_ref_func(results)
-        due_date = due_date_func(results)
-        invoice_date = invoice_date_func(results)
-        total_water_usage = total_water_usage_func(results)
-        description = description_func(results)
-        this_reading = this_reading_func(results)
-        last_reading = last_reading_func(results)
-        consumption = consumption_func(results)
-        print(total_amount, 'totaaaaaal')
-        print(meter_no, 'meter_no')
-        print(inv_ref, 'inv_ref')
-        print(due_date, 'due_date')
-        print(invoice_date, 'invoice_date')
-        print(total_water_usage, 'total_water_usage')
-        print(description, 'description')
-        print(this_reading, 'this_reading')
-        print(last_reading, 'last_reading')
-        print(consumption, 'consumption_func')
+        formed_data = {}
+        formed_data['total_amount'] = total_amount_func(results)
+        formed_data['description'] = description_func(results)
+        formed_data['inv_ref']= inv_ref_func(results)
+        formed_data['due_date'] = due_date_func(results)
+        formed_data['invoice_date']= invoice_date_func(results)
+        formed_data['total_water_usage'] = total_water_usage_func(results)
+        formed_data['meter_no'] = meter_no_func(results)
+        formed_data['this_reading'] = this_reading_func(results)
+        formed_data['last_reading'] = last_reading_func(results)
+        formed_data['consumption'] = consumption_func(results)
+
+        # we will create a dictionary here to store the results
     except:
         os.remove(tmp_path)
         raise HTTPException(detail=logging.error("Exception occurred while fetching data", exc_info=True), status_code=400)
 
     os.remove(tmp_path)
-    return {"results": results, 'tst':'tst'}
+    return {"results": formed_data, 'tst':'tst'}
 
 
 

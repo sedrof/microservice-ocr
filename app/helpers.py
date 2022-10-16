@@ -13,7 +13,7 @@ def inv_ref_func(pdf_all_pages):
     patterns = re.compile(r'Ref\sno.:\s\d{4}\s\d{3}\s\d{4}')
     matches = patterns.finditer(pdf_all_pages)
     ref = [ result.group(0) for result in matches][0].replace("Refno.:",'').split(':')[1].replace(" ",'')
-    return int(ref)
+    return str(ref)
 
 def description_func(pdf_all_pages):
     patterns = re.compile(r'(Account\sfor\s)\d.+?(Card)')
