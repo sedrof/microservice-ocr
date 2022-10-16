@@ -1,5 +1,6 @@
 from cgitb import reset
 import os
+import itertools
 import pytesseract
 import fitz
 import concurrent.futures
@@ -42,15 +43,7 @@ def create_picture(vector):
     return predictions
 
 
-pages_text = []
 def execute_concurrently(function, kwargs_list):
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-    #     futures = [executor.submit(function, kwargs) for kwargs in kwargs_list]
-    # for future in concurrent.futures.as_completed(futures):
-    #     pages_text.append(future.result())
-
     with Pool() as p:
         datas = p.map(function, kwargs_list)
-    import itertools
     return("".join(list(itertools.chain.from_iterable(datas))))
-    return datas

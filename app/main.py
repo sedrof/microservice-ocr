@@ -17,13 +17,11 @@ from fastapi import(
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseSettings
-from PIL import Image
 from . ocr import create_ocr, create_picture, execute_concurrently, create_ocr
-#  create_ocr
+from .helpers import *
 from tempfile import NamedTemporaryFile
 import shutil
 import fitz
-from multiprocessing import Pool, cpu_count
 
 ACCESS_ID = 'DO006YU2K49CFPYZZ6FT'
 SECRET_KEY = 'u9heysFpujtYAZxxzM+l+sD0MOuhmneHyA1vvv+IZ7E'
@@ -103,25 +101,35 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         os.remove(tmp_path)
         raise HTTPException(detail=logging.error("Exception occurred", exc_info=True), status_code=400)
 
+    try:
+        total_amount = total_amount_func(results)
+        meter_no = meter_no_func(results)
+        inv_ref = inv_ref_func(results)
+        due_date = due_date_func(results)
+        invoice_date = invoice_date_func(results)
+        total_water_usage = total_water_usage_func(results)
+        description = description_func(results)
+        this_reading = this_reading_func(results)
+        last_reading = last_reading_func(results)
+        consumption = consumption_func(results)
+        print(total_amount, 'totaaaaaal')
+        print(meter_no, 'meter_no')
+        print(inv_ref, 'inv_ref')
+        print(due_date, 'due_date')
+        print(invoice_date, 'invoice_date')
+        print(total_water_usage, 'total_water_usage')
+        print(description, 'description')
+        print(this_reading, 'this_reading')
+        print(last_reading, 'last_reading')
+        print(consumption, 'consumption_func')
+    except:
+        os.remove(tmp_path)
+        raise HTTPException(detail=logging.error("Exception occurred while fetching data", exc_info=True), status_code=400)
+
     os.remove(tmp_path)
     return {"results": results, 'tst':'tst'}
 
 
-# @app.post("/img-echo/", response_class=FileResponse) # http POST
-# async def img_echo_view(file:UploadFile = File(...), settings:Settings = Depends(get_settings)):
-#     if not settings.echo_active:
-#         raise HTTPException(detail="Invalid endpoint", status_code=400)
-#     UPLOAD_DIR.mkdir(exist_ok=True)
-#     bytes_str = io.BytesIO(await file.read())
-#     try:
-#         img = Image.open(bytes_str)
-#     except:
-#         raise HTTPException(detail="Invalid image", status_code=400)
-#     fname = pathlib.Path(file.filename)
-#     fext = fname.suffix
-#     dest = UPLOAD_DIR / f"{uuid.uuid1()}{fext}"
-#     img.save(dest)
-#     return dest
 
 
 
