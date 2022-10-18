@@ -107,19 +107,24 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         formed_data['inv_ref']= inv_ref_func(results)
         formed_data['due_date'] = due_date_func(results)
         formed_data['invoice_date']= invoice_date_func(results)
-        formed_data['total_water_usage'] = total_water_usage_func(results)
-        formed_data['meter_no'] = meter_no_func(results)
-        formed_data['this_reading'] = this_reading_func(results)
-        formed_data['last_reading'] = last_reading_func(results)
-        formed_data['consumption'] = consumption_func(results)
-
-        # we will create a dictionary here to store the results
+        formed_data['meters'] = []
+        i =0
+        for _ in meter_no_func(results):
+            formed_data['meters'].append(
+                {
+                    'meter_no':meter_no_func(results)[i],
+                    'this_reading':this_reading_func(results)[i],
+                    'last_reading':last_reading_func(results)[i],
+                    'consumption':consumption_func(results)[i]
+                },
+                )
+            i+=1
     except:
         os.remove(tmp_path)
         raise HTTPException(detail=logging.error("Exception occurred while fetching data", exc_info=True), status_code=400)
 
     os.remove(tmp_path)
-    return {"results": formed_data, 'tst':'tst'}
+    return {"results": formed_data}
 
 
 
