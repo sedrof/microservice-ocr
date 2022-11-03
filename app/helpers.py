@@ -19,7 +19,6 @@ def description_func(pdf_all_pages):
     patterns = re.compile(r'(Account\sfor\s)\d.+?(Card)')
     matches = patterns.finditer(pdf_all_pages)
     ref = [ result.group(0) for result in matches][0].split('Card')[0].split("for ")[1]
-    print(ref)
     if 'Prospect' in ref:
         patterns = re.compile(r'(Account\sfor\s)\d.+?(ProspectWATERB)')
         matches = patterns.finditer(pdf_all_pages)
@@ -82,7 +81,8 @@ def meter_length(pdf_all_pages):
     return len(meter_numbers_ref)
 
 def meter_no_func(pdf_all_pages):
-    patterns = re.compile(r'([(kl)]\w{4}\d{4}|[EST*]\w{4}\d{4})')
+    # patterns = re.compile(r'([(kl)]\w{4}\d{4}|[EST*]\w{4}\d{4})')
+    patterns = re.compile(r'([(kl)]\w{4}\d{4})')
     matches = patterns.finditer(pdf_all_pages)
     ref = [result.group(0) for result in matches]
     final_list = []
@@ -94,7 +94,6 @@ def meter_no_func(pdf_all_pages):
         f = [s.translate(removetable) for s in final_list]
         if len(final_list) == 0:
             try:
-                print('ss')
                 patterns = re.compile(r'Meter\sNo.\w{4}\d{4}')
                 matches = patterns.finditer(pdf_all_pages)
                 ref = [result.group(0) for result in matches][0].split(".")[1]
@@ -104,7 +103,6 @@ def meter_no_func(pdf_all_pages):
             except:
                 pass
             try:
-                print("jk")
                 patterns = re.compile(r'Consumption.+?EST')
                 matches = patterns.finditer(pdf_all_pages)
                 ref = [result.group(0) for result in matches][0].split(".")[0].split(")")[1].split(" ")[0]

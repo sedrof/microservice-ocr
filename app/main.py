@@ -108,10 +108,10 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
         formed_data['due_date'] = due_date_func(results)
         formed_data['invoice_date']= invoice_date_func(results)
         
-        i = 0
         # formed_data_2 = {}
         meters = []
-        for _ in meter_no_func(results):
+        for i in range(len(meter_no_func(results))):
+
             meters.append(
                 {
                     'meter_no':meter_no_func(results)[i],
@@ -120,11 +120,10 @@ async def prediction_view(file:UploadFile = File(...), authorization = Header(No
                     'consumption':consumption_func(results)[i]
                 },
                 )
-            i+=1
     except:
         os.remove(tmp_path)
         raise HTTPException(detail=logging.error("Exception occurred while fetching data", exc_info=True), status_code=400)
-    
+
     os.remove(tmp_path)
     return {"transactions": formed_data,"meters": meters}
 
