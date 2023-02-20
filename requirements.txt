@@ -1,4 +1,6 @@
 fastapi
+# opencv-python
+numpy
 gunicorn
 uvicorn
 jinja2
@@ -11,3 +13,5 @@ python-multipart
 pillow
 pytesseract
 pymupdf
+mangum
+opencv-python-headless
