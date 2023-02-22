@@ -96,3 +96,8 @@ async def extract_text_from_pdf(file: UploadFile):
     return {"invoiceDetails": results_obj,"meterDetails": results_array}
 
 
+
+
+#az acr login --name waterOCR --expose-token
+#docker login waterOCR.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password
+# 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

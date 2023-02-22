@@ -168,8 +168,5 @@ def add_data_to_object(text):
     except:
             pass
     return formed_data, meters
-
-
-
-
+    
     #ssh -i "newtagasdfdsfsdafdasfasdf.pem" ec2-user@ec2-3-26-242-191.ap-southeast-2.compute.amazonaws.com

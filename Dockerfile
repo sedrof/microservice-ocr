@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM --platform=linux/amd64 python:3.9-slim
 
 COPY ./app /app
 COPY ./entrypoint.sh /entrypoint.sh
@@ -19,5 +19,8 @@ RUN apt-get update && \
     && apt-get remove -y --purge make gcc build-essential \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 8000 2222
+
 
 CMD [ "./entrypoint.sh" ]

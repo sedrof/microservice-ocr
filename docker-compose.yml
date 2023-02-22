@@ -2,9 +2,9 @@ version: '3'
 
 services:
   app:
-    image: awsocr:latest
+    image: newocr:v3
     volumes:
       - ./app:/app
     ports:
-      - 8001:8001
+      - 8000:8000
     command: ["./entrypoint.sh"]
